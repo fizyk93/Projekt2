@@ -36,6 +36,8 @@ def main():
         ls = LightSource()
         rgb = ls.shade(points, mycmap)
 
+        print rgb
+
         plt.figure(figsize=(12,5))
         plt.subplot(111)
         plt.imshow(rgb)

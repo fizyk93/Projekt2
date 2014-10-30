@@ -9,6 +9,11 @@ from numpy import *
 
 from PIL import Image, ImageDraw
 
+font = {'family' : 'times new roman',
+        'size' : 12}
+
+plt.rc('font', **font)
+
 
 def main():
 
@@ -23,15 +28,11 @@ def main():
             points = vstack((points, temp))
 
         points = points[1:]
-        # print points
         min = points.min()
         max = points.max()
         for n in range(len(points)):
             points[n] = array([(point - min)/(max-min) for point in points[n]])
 
-
-        im = Image.new('RGB',(500,500))
-        draw = ImageDraw.Draw(im)
 
         angles = empty([len(points), len(points)])
         for y in range(len(points[:len(points)-1])):
@@ -43,15 +44,19 @@ def main():
         angles /= angles.max()
         angles -= 0.5
 
-        print angles
+        cmap = empty([len(points), len(points), 3])
         for y in range(len(points)):
             for x in range(len(points[y])):
                 t = gradient_hsv_map(points[x,y],angles[x,y])
-                # print point
-                color = (int(round(255*t[0])), int(round(255*t[1])), int(round(255*t[2])))
-                # print "{0},{1} {2}".format(x,y,color)
-                draw.point((y,x), fill=color)
-        im.save('blah4.png', "PNG")
+                cmap[x][y] = array([t[0], t[1], t[2]])
+
+        fig = plt.figure()
+        plt.subplot(111)
+        plt.imshow(cmap)
+        plt.xticks([0,100,200,300,400]); plt.yticks([0,100,200,300,400])
+
+        plt.show()
+        fig.savefig('map.pdf')
 
 
 def gradient_hsv_map(v,a):
@@ -66,18 +71,23 @@ def hsv2rgb(h, s, v):
     x = c * (1 - abs(h%2 - 1))
     m = v - c
 
+
     if h < 1:
-        return (c+m, x+m, m)
+        result = (c+m, x+m, m)
     elif h < 2:
-        return (x+m, c+m, m)
+        result = (x+m, c+m, m)
     elif h < 3:
-        return (m, c+m, x+m)
+        result = (m, c+m, x+m)
     elif h < 4:
-        return (m, x+m, c+m)
+        result = (m, x+m, c+m)
     elif h < 5:
-        return (x+m, m, c+m)
+        result = (x+m, m, c+m)
     else:
-        return (c+m, m, x+m)
+        result = (c+m, m, x+m)
+
+    result = [0. if i<0 else i for i in result]
+    result = [1. if i>1 else i for i in result]
+    return tuple(result)
 
 def gradient_rgb_bw(v):
 

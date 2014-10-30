@@ -1,27 +1,19 @@
-import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib.colors import LightSource
+import matplotlib.image as mpimg
+import numpy as np
 
-# example showing how to make shaded relief plots
-# like Mathematica
-# (http://reference.wolfram.com/mathematica/ref/ReliefPlot.html)
-# or Generic Mapping Tools
-# (http://gmt.soest.hawaii.edu/gmt/doc/gmt/html/GMT_Docs/node145.html)
+img = mpimg.imread('blah4.png')
 
-# test data
-X,Y=np.mgrid[-5:5:0.05,-5:5:0.05]
-Z=np.sqrt(X**2+Y**2)+np.sin(X**2+Y**2)
-# create light source object.
-ls = LightSource(azdeg=0,altdeg=65)
-# shade data, creating an rgb array.
-rgb = ls.shade(Z,plt.cm.copper)
-# plot un-shaded and shaded images.
-plt.figure(figsize=(12,5))
+print img
 
-plt.subplot(111)
-plt.imshow(rgb)
-plt.title('imshow with shading')
-plt.xticks([]); plt.yticks([])
-plt.savefig('blee2.png', dpi=150)
+with open('blah.txt',mode='w') as f:
+    for line in img:
+        for point in line:
+            f.write('[')
+            for x in point:
+                f.write('{0} '.format(str(x)))
+            f.write(']')
+        f.write('\n')
 
+imgplot = plt.imshow(img)
 plt.show()
