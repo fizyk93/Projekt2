@@ -12,7 +12,6 @@ from PIL import Image, ImageDraw
 
 def main():
 
-
     with open('big.dem') as f:
         f.readline()
 
@@ -30,32 +29,36 @@ def main():
         for n in range(len(points)):
             points[n] = array([(point - min)/(max-min) for point in points[n]])
 
-        cdict = gradient_to_dict(gradient_hsv_map)
-        mycmap = LinearSegmentedColormap('mycmap', cdict)
 
-        ls = LightSource()
-        rgb = ls.shade(points, mycmap)
+        im = Image.new('RGB',(500,500))
+        draw = ImageDraw.Draw(im)
 
-        plt.figure(figsize=(12,5))
-        plt.subplot(111)
-        plt.imshow(rgb)
-        plt.xticks([]); plt.yticks([])
+        angles = empty([len(points), len(points)])
+        for y in range(len(points[:len(points)-1])):
+            row = []
+            for x in range(len(points[y])-1):
+                angles[x+1][y+1] = points[x][y]-points[x+1][y+1]
 
-        # plt.show()
-        plt.savefig('blah3.png')
+        angles = (angles-angles.min())
+        angles /= angles.max()
+        angles -= 0.5
 
-        # im = Image.new('RGB',(500,500))
-        # draw = ImageDraw.Draw(im)
+        print angles
+        for y in range(len(points)):
+            for x in range(len(points[y])):
+                t = gradient_hsv_map(points[x,y],angles[x,y])
+                # print point
+                color = (int(round(255*t[0])), int(round(255*t[1])), int(round(255*t[2])))
+                # print "{0},{1} {2}".format(x,y,color)
+                draw.point((y,x), fill=color)
+        im.save('blah4.png', "PNG")
 
-        # for y in range(len(points)):
-        #     for x in range(len(points[y])):
-        #         t = gradient_hsv_unknown(points[x,y])
-        #         # print point
-        #         color = (int(round(255*t[0])), int(round(255*t[1])), int(round(255*t[2])))
-        #         # print "{0},{1} {2}".format(x,y,color)
-        #         draw.point((y,x), fill=color)
-        # im.save('blah.png', "PNG")
 
+def gradient_hsv_map(v,a):
+    if a < 0:
+        return hsv2rgb(120 - v*120, 1+3*a, 1)
+    else:
+        return hsv2rgb(120 - v*120, 1+a, 1-1.5*a)
 def hsv2rgb(h, s, v):
 
     c = v * s
@@ -137,8 +140,7 @@ def gradient_hsv_custom(v):
 
     return hsv2rgb(0+360*v, 1-v, 1)
 
-def gradient_hsv_map(v):
-    return hsv2rgb(120 - v*120, 1, 1)
+
 
 def gradient_to_dict(gradient_func):
     cdict = {'red': [], 'green': [], 'blue': []}
